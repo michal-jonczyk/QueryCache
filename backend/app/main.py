@@ -1,0 +1,36 @@
+from fastapi import FastAPI
+from datetime import datetime
+
+from core.config import settings
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="Intelligent SQL query caching middleware with Redis",
+    version=settings.APP_VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+
+@app.get("/")
+async def root():
+    return {
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "status": "running",
+        "message": "Welcome! Check /docs for API documentation."
+    }
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "querycache",
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
