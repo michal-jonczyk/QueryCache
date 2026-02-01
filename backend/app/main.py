@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from datetime import datetime
 
+from api.query import router as query_router
 from core.config import settings
 
 app = FastAPI(
@@ -11,6 +12,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+app.include_router(query_router)
 
 @app.get("/")
 async def root():
