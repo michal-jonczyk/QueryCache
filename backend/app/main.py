@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from datetime import datetime
 
 from api.query import router as query_router
+from api.stats import router as stats_router
 from core.config import settings
 from core.database import Base, engine
 
-
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -16,8 +17,8 @@ app = FastAPI(
 )
 
 
-Base.metadata.create_all(bind=engine)
 
+app.include_router(stats_router)
 app.include_router(query_router)
 
 @app.get("/")
