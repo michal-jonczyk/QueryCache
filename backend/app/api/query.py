@@ -7,13 +7,15 @@ from datetime import datetime
 from core.database import SessionLocal
 from core.models import QueryCache
 from services.redis_service import redis_service
+from services.normalizer import normalize_query
 
 router = APIRouter()
 
 
 @router.get("/query")
 async def execute_query(sql: str):
-    query_hash = hashlib.md5(sql.encode()).hexdigest()
+    normalized_sql = normalize_query(sql)
+    query_hash = hashlib.md5(normalized_sql.encode()).hexdigest()
 
     cached = await redis_service.get(query_hash)
     if cached:
