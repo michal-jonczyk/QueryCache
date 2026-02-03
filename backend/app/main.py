@@ -1,56 +1,45 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
 
-from app.api.query import router as query_router
-from app.api.stats import router as stats_router
-from app.api.cache import router as cache_router
-from app.core.config import settings
-from app.core.database import Base, engine
-from app.api.invalidate import router as invalidate_router
-Base.metadata.create_all(bind=engine)
+from app.api import query, stats, cache, invalidate
 
 app = FastAPI(
-    title=settings.APP_NAME,
-    description="Intelligent SQL query caching middleware with Redis",
-    version=settings.APP_VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    title="QueryCache API",
+    description="SQL Query Caching Middleware with Redis",
+    version="1.0.0"
 )
 
-
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173",
-        "https://query-cache.vercel.app"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://query-cache.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(query.router, tags=["Query"])
+app.include_router(stats.router, tags=["Statistics"])
+app.include_router(cache.router, tags=["Cache"])
+app.include_router(invalidate.router, tags=["Invalidation"])
 
-app.include_router(cache_router)
-app.include_router(stats_router)
-app.include_router(query_router)
-app.include_router(invalidate_router)
 
 @app.get("/")
 async def root():
     return {
-        "app": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "status": "running",
-        "message": "Welcome! Check /docs for API documentation."
+        "message": "QueryCache API is running",
+        "docs": "/docs",
+        "health": "/health"
     }
 
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "service": "querycache",
-    }
+    return {"status": "healthy"}
 
 
 @app.on_event("startup")
@@ -62,6 +51,7 @@ async def startup_event():
 
     db = SessionLocal()
     try:
+        # Check if database is empty
         product_count = db.query(Product).count()
         if product_count == 0:
             print("📦 Database is empty, seeding...")
@@ -75,6 +65,36 @@ async def startup_event():
         db.close()
 
 
+@app.get("/seed-now")
+async def manual_seed():
+    """Manual database seeding"""
+    from app.core.seed_database import seed_database
+    from app.core.database import SessionLocal
+    from app.core.models import Product
+
+    db = SessionLocal()
+    try:
+        count_before = db.query(Product).count()
+        print(f"Products before seeding: {count_before}")
+
+        seed_database()
+
+        count_after = db.query(Product).count()
+        print(f"Products after seeding: {count_after}")
+
+        return {
+            "status": "success",
+            "products_before": count_before,
+            "products_after": count_after
+        }
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return {"status": "error", "message": str(e)}
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
