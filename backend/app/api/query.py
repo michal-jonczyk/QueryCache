@@ -49,8 +49,7 @@ async def execute_query(sql: str):
             "source": "cache",
             "query": sql,
             "result": json.loads(cached),
-            "execution_time_ms": 2,
-            "cached_at": datetime.now().isoformat()
+            "execution_time_ms": 2
         }
 
     db = SessionLocal()
@@ -59,7 +58,15 @@ async def execute_query(sql: str):
     try:
         result = db.execute(text(sql))
         time.sleep(0.02)
-        rows = [dict(row._mapping) for row in result]
+
+        rows = []
+        for row in result:
+            row_dict = dict(row._mapping)
+            for key, value in row_dict.items():
+                if isinstance(value, datetime):
+                    row_dict[key] = value.isoformat()
+            rows.append(row_dict)
+
         execution_time_ms = round((time.time() - start_time) * 1000, 2)
 
         await redis_service.set(query_hash, json.dumps(rows))
@@ -92,8 +99,7 @@ async def execute_query(sql: str):
             "source": "database",
             "query": sql,
             "result": rows,
-            "execution_time_ms": execution_time_ms,
-            "cached_at": datetime.now().isoformat()
+            "execution_time_ms": execution_time_ms
         }
 
     except Exception as e:
