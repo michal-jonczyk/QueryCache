@@ -6,6 +6,7 @@ from api.stats import router as stats_router
 from api.cache import router as cache_router
 from core.config import settings
 from core.database import Base, engine
+from  api.invalidate import router as invalidate_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,6 +22,7 @@ app = FastAPI(
 app.include_router(cache_router)
 app.include_router(stats_router)
 app.include_router(query_router)
+app.include_router(invalidate_router)
 
 @app.get("/")
 async def root():
