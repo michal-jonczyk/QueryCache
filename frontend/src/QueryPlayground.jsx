@@ -18,15 +18,18 @@ export default function QueryPlayground() {
     setLoading(false)
   }
 
-  const clearCache = async () => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/cache`, { method: 'DELETE' })
-      setResult(null)
-      alert('Cache cleared!')
-    } catch (err) {
-      console.error(err)
-    }
+ const clearCache = async () => {
+  console.log('API URL:', import.meta.env.VITE_API_URL)
+
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}/cache`, { method: 'DELETE' })
+    setResult(null)
+    alert('Cache cleared!')
+  } catch (err) {
+    console.error('Error:', err)
+    alert('Error: ' + err.message)
   }
+}
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg mb-8">
