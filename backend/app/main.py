@@ -2,13 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
-from api.query import router as query_router
-from api.stats import router as stats_router
-from api.cache import router as cache_router
-from core.config import settings
-from core.database import Base, engine
-from api.invalidate import router as invalidate_router
-
+from app.api.query import router as query_router
+from app.api.stats import router as stats_router
+from app.api.cache import router as cache_router
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.api.invalidate import router as invalidate_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
