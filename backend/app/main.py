@@ -7,7 +7,7 @@ from api.stats import router as stats_router
 from api.cache import router as cache_router
 from core.config import settings
 from core.database import Base, engine
-from  api.invalidate import router as invalidate_router
+from api.invalidate import router as invalidate_router
 
 Base.metadata.create_all(bind=engine)
 
