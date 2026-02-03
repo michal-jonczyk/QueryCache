@@ -34,16 +34,17 @@ def test_stats_endpoint():
 
 
 def test_query_endpoint():
-    response = client.get("/query?sql=SELECT * FROM test")
+    response = client.get("/query?sql=SELECT * FROM products LIMIT 5")
     assert response.status_code == 200
     data = response.json()
     assert "source" in data
     assert "query" in data
     assert "result" in data
+    assert "execution_time_ms" in data
 
 
 def test_query_caching():
-    sql = "SELECT * FROM test_cache WHERE id=999"
+    sql = "SELECT * FROM products WHERE id=1"
 
     response1 = client.get(f"/query?sql={sql}")
     assert response1.status_code == 200
@@ -58,8 +59,12 @@ def test_query_normalization():
     sql1 = "SELECT * FROM products WHERE id=1"
     sql2 = "SELECT  *  FROM  products  WHERE  id=1"
 
+
+    client.delete("/cache?clear_db=false")
+
     response1 = client.get(f"/query?sql={sql1}")
     assert response1.status_code == 200
+    assert response1.json()["source"] == "database"
 
     response2 = client.get(f"/query?sql={sql2}")
     assert response2.status_code == 200
@@ -95,3 +100,10 @@ def test_cache_clear():
     data = response.json()
     assert "message" in data
     assert "redis_keys_deleted" in data
+
+
+def test_query_with_error():
+    response = client.get("/query?sql=SELECT * FROM nonexistent_table")
+    assert response.status_code == 200
+    data = response.json()
+    assert "error" in data
