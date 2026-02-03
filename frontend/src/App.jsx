@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import QueryPlayground from './QueryPlayground'
 
 function App() {
   const [stats, setStats] = useState(null)
@@ -55,6 +56,8 @@ function App() {
           <span className="text-sm text-gray-400">Refresh in: {countdown}s</span>
         </div>
       </div>
+
+      <QueryPlayground />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-slate-800 p-6 rounded-lg">
