@@ -53,6 +53,28 @@ async def health_check():
     }
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Seed database on startup if empty"""
+    from app.core.seed_database import seed_database
+    from app.core.database import SessionLocal
+    from app.core.models import Product
+
+    db = SessionLocal()
+    try:
+        product_count = db.query(Product).count()
+        if product_count == 0:
+            print("📦 Database is empty, seeding...")
+            seed_database()
+            print("✅ Database seeded successfully!")
+        else:
+            print(f"✅ Database already has {product_count} products")
+    except Exception as e:
+        print(f"⚠️ Seeding check failed: {e}")
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
