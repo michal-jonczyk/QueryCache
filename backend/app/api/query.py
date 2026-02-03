@@ -3,12 +3,13 @@ import json
 
 from fastapi import APIRouter
 from datetime import datetime
-
+from core.models import TableQueryMapping
 from core.database import SessionLocal
 from core.models import QueryCache
 from services.redis_service import redis_service
 from services.normalizer import normalize_query
 from services.sql_parser import get_query_type, extract_tables
+from services.sql_parser import extract_tables
 
 router = APIRouter()
 
@@ -56,12 +57,22 @@ async def execute_query(sql: str):
     ).first()
 
     if not cache_entry:
+
         cache_entry = QueryCache(
             query_hash=query_hash,
             original_query=sql,
             cached_result=json.dumps(simulated_result),
         )
         db.add(cache_entry)
+
+        tables = extract_tables(sql)
+        for table in tables:
+            mapping = TableQueryMapping(
+                table_name=table,
+                query_hash=query_hash
+            )
+            db.add(mapping)
+
         db.commit()
     db.close()
 

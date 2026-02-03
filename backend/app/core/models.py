@@ -13,3 +13,11 @@ class QueryCache(Base):
     cached_result = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
     hits = Column(Integer, default=0)
+
+
+class TableQueryMapping(Base):
+    __tablename__ = "table_query_mapping"
+    id = Column(Integer, primary_key=True)
+    table_name = Column(String,nullable=False)
+    query_hash = Column(String,nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
