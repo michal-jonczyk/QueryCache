@@ -8,8 +8,18 @@ from core.database import SessionLocal
 from core.models import QueryCache
 from services.redis_service import redis_service
 from services.normalizer import normalize_query
+from services.sql_parser import get_query_type, extract_tables
 
 router = APIRouter()
+
+
+@router.get("/parse")
+async def parse_query(sql: str):
+    return {
+        "query": sql,
+        "type": get_query_type(sql),
+        "tables": extract_tables(sql)
+    }
 
 
 @router.get("/query")
