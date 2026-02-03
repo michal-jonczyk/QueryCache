@@ -1,15 +1,17 @@
 import hashlib
 import json
+import time
 
 from fastapi import APIRouter
 from datetime import datetime
+from sqlalchemy import text
+
 from core.models import TableQueryMapping
 from core.database import SessionLocal
 from core.models import QueryCache
 from services.redis_service import redis_service
 from services.normalizer import normalize_query
 from services.sql_parser import get_query_type, extract_tables
-from services.sql_parser import extract_tables
 
 router = APIRouter()
 
@@ -25,6 +27,9 @@ async def parse_query(sql: str):
 
 @router.get("/query")
 async def execute_query(sql: str):
+    if not sql.strip().upper().startswith("SELECT"):
+        return {"error": "Only SELECT queries are allowed"}
+
     normalized_sql = normalize_query(sql)
     query_hash = hashlib.md5(normalized_sql.encode()).hexdigest()
 
@@ -44,41 +49,56 @@ async def execute_query(sql: str):
             "source": "cache",
             "query": sql,
             "result": json.loads(cached),
+            "execution_time_ms": 2,
             "cached_at": datetime.now().isoformat()
         }
 
-    simulated_result = {"rows": [{"id": 1, "name": "Product 1"}, {"id": 2, "name": "Product 2"}]}
-
-    await redis_service.set(query_hash, json.dumps(simulated_result))
-
     db = SessionLocal()
-    cache_entry = db.query(QueryCache).filter(
-        QueryCache.query_hash == query_hash
-    ).first()
+    start_time = time.time()
 
-    if not cache_entry:
+    try:
+        result = db.execute(text(sql))
+        time.sleep(0.02)
+        rows = [dict(row._mapping) for row in result]
+        execution_time_ms = round((time.time() - start_time) * 1000, 2)
 
-        cache_entry = QueryCache(
-            query_hash=query_hash,
-            original_query=sql,
-            cached_result=json.dumps(simulated_result),
-        )
-        db.add(cache_entry)
+        await redis_service.set(query_hash, json.dumps(rows))
 
-        tables = extract_tables(sql)
-        for table in tables:
-            mapping = TableQueryMapping(
-                table_name=table,
-                query_hash=query_hash
+        cache_entry = db.query(QueryCache).filter(
+            QueryCache.query_hash == query_hash
+        ).first()
+
+        if not cache_entry:
+            cache_entry = QueryCache(
+                query_hash=query_hash,
+                original_query=sql,
+                cached_result=json.dumps(rows),
             )
-            db.add(mapping)
+            db.add(cache_entry)
 
-        db.commit()
-    db.close()
+            tables = extract_tables(sql)
+            for table in tables:
+                mapping = TableQueryMapping(
+                    table_name=table,
+                    query_hash=query_hash
+                )
+                db.add(mapping)
 
-    return {
-        "source": "database",
-        "query": sql,
-        "result": simulated_result,
-        "cached_at": datetime.now().isoformat()
-    }
+            db.commit()
+
+        db.close()
+
+        return {
+            "source": "database",
+            "query": sql,
+            "result": rows,
+            "execution_time_ms": execution_time_ms,
+            "cached_at": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        db.close()
+        return {
+            "error": str(e),
+            "query": sql
+        }
