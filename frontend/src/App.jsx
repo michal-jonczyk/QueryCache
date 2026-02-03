@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react'
 function App() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [countdown, setCountdown] = useState(5)
 
-  useEffect(() => {
+  const fetchStats = () => {
     fetch('http://localhost:8000/stats')
       .then(res => res.json())
       .then(data => {
@@ -15,6 +16,24 @@ function App() {
         console.error('Error fetching stats:', err)
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchStats()
+
+    const mainInterval = setInterval(() => {
+      fetchStats()
+      setCountdown(5)
+    }, 5000)
+
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => prev > 0 ? prev - 1 : 5)
+    }, 1000)
+
+    return () => {
+      clearInterval(mainInterval)
+      clearInterval(countdownInterval)
+    }
   }, [])
 
   if (loading) {
@@ -27,9 +46,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
-      <h1 className="text-4xl font-bold text-cyan-400 mb-8">
-        QueryCache Dashboard
-      </h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-cyan-400">
+          QueryCache Dashboard
+        </h1>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-sm text-gray-400">Refresh in: {countdown}s</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-slate-800 p-6 rounded-lg">
