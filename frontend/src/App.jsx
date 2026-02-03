@@ -7,7 +7,7 @@ function App() {
   const [countdown, setCountdown] = useState(5)
 
   const fetchStats = () => {
-    fetch('http://localhost:8000/stats')
+    fetch(`${import.meta.env.VITE_API_URL}/stats`)
       .then(res => res.json())
       .then(data => {
         setStats(data)
