@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from core.database import SessionLocal
-from core.models import QueryCache, TableQueryMapping
-from services.redis_service import redis_service
-from services.sql_parser import get_query_type, extract_tables
+from app.core.database import SessionLocal
+from app.core.models import QueryCache, TableQueryMapping
+from app.services.redis_service import redis_service
+from app.services.sql_parser import get_query_type, extract_tables
 
 router = APIRouter()
 

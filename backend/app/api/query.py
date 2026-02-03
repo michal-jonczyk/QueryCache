@@ -6,12 +6,12 @@ from fastapi import APIRouter
 from datetime import datetime
 from sqlalchemy import text
 
-from core.models import TableQueryMapping
-from core.database import SessionLocal
-from core.models import QueryCache
-from services.redis_service import redis_service
-from services.normalizer import normalize_query
-from services.sql_parser import get_query_type, extract_tables
+from app.core.models import TableQueryMapping
+from app.core.database import SessionLocal
+from app.core.models import QueryCache
+from app.services.redis_service import redis_service
+from app.services.normalizer import normalize_query
+from app.services.sql_parser import get_query_type, extract_tables
 
 router = APIRouter()
 

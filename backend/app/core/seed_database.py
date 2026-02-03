@@ -1,5 +1,5 @@
-from core.database import SessionLocal, engine, Base
-from core.models import Product, User, Order
+from app.core.database import SessionLocal, engine, Base
+from app.core.models import Product, User, Order
 from datetime import datetime, timedelta
 import random
 

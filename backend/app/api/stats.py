@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from sqlalchemy import func
 
-from core.database import SessionLocal
-from core.models import QueryCache
-from services.redis_service import redis_service
+from app.core.database import SessionLocal
+from app.core.models import QueryCache
+from app.services.redis_service import redis_service
 
 router = APIRouter()
 
