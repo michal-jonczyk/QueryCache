@@ -8,7 +8,8 @@ export default function QueryPlayground() {
   const executeQuery = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/query?sql=${encodeURIComponent(sql)}`)
+      const API_URL = import.meta.env.VITE_API_URL || 'https://querycache-production.up.railway.app'
+      const res = await fetch(`${API_URL}/query?sql=${encodeURIComponent(sql)}`)
       const data = await res.json()
       setResult(data)
     } catch (err) {
@@ -18,18 +19,27 @@ export default function QueryPlayground() {
     setLoading(false)
   }
 
- const clearCache = async () => {
-  console.log('API URL:', import.meta.env.VITE_API_URL)
+  const clearCache = async () => {
+    console.log('API URL:', import.meta.env.VITE_API_URL)
 
-  try {
-    await fetch(`${import.meta.env.VITE_API_URL}/cache`, { method: 'DELETE' })
-    setResult(null)
-    alert('Cache cleared!')
-  } catch (err) {
-    console.error('Error:', err)
-    alert('Error: ' + err.message)
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://querycache-production.up.railway.app'
+
+      // Dodaj ?clear_db=true żeby wyczyścić też statystyki
+      const res = await fetch(`${API_URL}/cache?clear_db=true`, {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+
+      console.log('Cache cleared:', data)
+      setResult(null)
+
+      alert(`Cache cleared!\nRedis keys: ${data.redis_keys_deleted}\nDB records: ${data.db_records_deleted}`)
+    } catch (err) {
+      console.error('Error:', err)
+      alert('Error: ' + err.message)
+    }
   }
-}
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg mb-8">
