@@ -16,14 +16,17 @@
 
 ## 📸 Screenshots
 
-### Dashboard Overview
-![Dashboard](https://via.placeholder.com/800x400?text=QueryCache+Dashboard)
+### Dashboard - Database Query (First Request)
+![Database Query](screenshots/query-cache-database.webp)
+*Initial query execution from database: 22.36ms*
 
-### Query Playground
-![Query Playground](https://via.placeholder.com/800x400?text=Query+Playground)
+### Dashboard - Cached Query (Subsequent Requests)
+![Cached Query](screenshots/query-cache-cache.webp)
+*Same query served from Redis cache: 2ms (11x faster!)*
 
-### Real-time Statistics
-![Statistics](https://via.placeholder.com/800x400?text=Real-time+Stats)
+### Real-time Statistics & Analytics
+![Statistics](screenshots/query-cache-top.webp)
+*Track query performance, cache hits, and most frequently accessed queries*
 
 ---
 
@@ -41,9 +44,9 @@ Database queries are slow and wasteful:
 
 **QueryCache fixes this:**
 
-✅ First query: ~200ms (hits database)  
+✅ First query: ~20ms (hits database)  
 ✅ Cached query: ~2ms (hits Redis)  
-✅ **99% response time reduction**  
+✅ **90% response time reduction**  
 
 ---
 
@@ -54,7 +57,7 @@ Execute any SELECT query - results are automatically cached in Redis.
 ```sql
 SELECT * FROM products WHERE category = 'Electronics'
 ```
-- First call: Database (~200ms)
+- First call: Database (~20ms)
 - Subsequent calls: Redis cache (~2ms)
 
 ### ⚡ **Smart Cache Invalidation**
