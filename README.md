@@ -39,7 +39,7 @@
 Database queries are slow and wasteful:
 
 ❌ Repeated identical queries waste resources  
-❌ ~200ms response times for simple SELECTs  
+❌ ~20ms response times for simple SELECTs  
 ❌ Database overload from redundant requests  
 
 **QueryCache fixes this:**
