@@ -547,4 +547,4 @@ This is a portfolio project, but suggestions welcome!
 - **Dashboard**: [https://query-cache.vercel.app](https://query-cache.vercel.app)
 - **API Documentation**: [https://querycache-production.up.railway.app/docs](https://querycache-production.up.railway.app/docs)
 
-Try executing SQL queries and see the caching in action! First query hits the database (~200ms), subsequent queries hit Redis cache (~2ms). **99% faster!** ⚡
+Try executing SQL queries and see the caching in action! First query hits the database (~20ms), subsequent queries hit Redis cache (~2ms). **90% faster!** ⚡
